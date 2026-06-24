@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu Letters Content Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="grain"></div>
+  <section id="loginGate" class="login-gate" aria-label="Login">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark">
+          <img src="Logo/Logoausgestellt Kopie 2.png" alt="Menu Letters Logo" />
+        </div>
+        <div>
+          <p class="eyebrow">Private Content Studio</p>
+          <h1>Menu Letters</h1>
+        </div>
+      </div>
+
+      <div class="login-hero">
+        <p class="script-title">welcome back</p>
+        <h2>Logge dich ein, um dein Studio zu öffnen.</h2>
+        <p class="muted">Diese App ist privat. Deine Supabase-Verbindung ist im Code hinterlegt und die Plattform wird erst nach erfolgreichem Login angezeigt.</p>
+      </div>
+
+      <div class="login-panel">
+        <label>
+          E-Mail
+          <input id="loginAuthEmail" type="email" autocomplete="email" placeholder="deine@email.de" />
+        </label>
+        <label>
+          Passwort
+          <input id="loginAuthPassword" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+        <div class="button-row">
+          <button class="primary-btn wide" id="loginSignInBtn" type="button">Einloggen</button>
+        </div>
+        <p id="loginStatus" class="muted tiny">Bitte einloggen.</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="Logo/Logoausgestellt Kopie 2.png" alt="Menu Letters Logo" />
+      </div>
+      <div>
+        <p class="eyebrow">Snail Mail Club</p>
+        <h1>Menu Letters</h1>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Main navigation">
+      <button class="nav-link active" data-view="dashboard">Dashboard</button>
+      <button class="nav-link" data-view="assistant">AI Assistant</button>
+      <button class="nav-link" data-view="todos">To-dos</button>
+      <button class="nav-link" data-view="calendar">Kalender</button>
+      <button class="nav-link" data-view="year">Jahresübersicht</button>
+      <button class="nav-link" data-view="moodboard">Moodboard</button>
+      <button class="nav-link" data-view="settings">Settings</button>
+    </nav>
+
+    <div class="side-card">
+      <p class="script-title">Monthly ritual</p>
+      <p>Design, Food & echte Post — jeden Monat ein kleiner kreativer Moment.</p>
+    </div>
+  </aside>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" id="todayLabel">Heute</p>
+        <h2 id="viewTitle">Content Studio</h2>
+      </div>
+      <div class="top-actions">
+        <button class="ghost-btn" id="syncStatus">Local Mode</button>
+        <button class="primary-btn" data-view-jump="assistant">Idee generieren</button>
+      </div>
+    </header>
+
+    <section class="view active" id="dashboardView">
+      <div class="hero-panel">
+        <div>
+          <p class="script-title">Hello sunshine, today is a good day!</p>
+          <h3>Let's create some amazing content!</h3>
+          <p class="muted max-text">Overview of your content activities for the day.</p>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="statIdeas">0</strong><span>Content Ideen</span></div>
+          <div><strong id="statTodos">0</strong><span>offene To-dos</span></div>
+          <div><strong id="statEvents">0</strong><span>Kalenderpunkte</span></div>
+        </div>
+      </div>
+
+      <div class="grid two-col">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Heute / diese Woche</p>
+              <h3>Quick To-dos</h3>
+            </div>
+            <button class="small-btn" data-view-jump="todos">Alle öffnen</button>
+          </div>
+          <div id="dashboardTodos" class="mini-list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Content Queue</p>
+              <h3>Nächste Ideen</h3>
+            </div>
+            <button class="small-btn" data-view-jump="assistant">Neu</button>
+          </div>
+          <div id="dashboardIdeas" class="mini-list"></div>
+        </article>
+      </div>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Content pillars</p>
+            <h3>Menu Letters Content-System</h3>
+          </div>
+        </div>
+        <div class="pillars">
+          <div><span>01</span><strong>Behind the scenes</strong><p>Briefe packen, Rezept testen, Postkarten designen, Studio-Momente.</p></div>
+          <div><span>02</span><strong>Founder Story</strong><p>Warum echte Post, Food und Design dein perfekter Mix sind.</p></div>
+          <div><span>03</span><strong>Slow living</strong><p>Kreative Pausen, analoges Leben, kleine Rituale im Alltag.</p></div>
+          <div><span>04</span><strong>Conversion</strong><p>Abo-Fristen, Versand am 15., Monats-Theme und klare CTA.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="view" id="assistantView">
+      <div class="grid assistant-grid">
+        <article class="panel sticky-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">GPT Assistant</p>
+              <h3>Menu Letters Content Generator</h3>
+            </div>
+          </div>
+
+          <form id="assistantForm" class="form-stack">
+            <label>
+              Monatsthema
+              <input id="aiTheme" required placeholder="z. B. Sommermarkt auf Ibiza" />
+            </label>
+            <label>
+              Monatsrezept
+              <input id="aiRecipe" required placeholder="z. B. Blaubeer-Zitronen-Muffins" />
+            </label>
+            <div class="split">
+              <label>
+                Zeitbudget
+                <select id="aiEffort">
+                  <option value="10 Minuten">10 Minuten / ultra schnell</option>
+                  <option value="30 Minuten" selected>30 Minuten / realistisch</option>
+                  <option value="90 Minuten">90 Minuten / hochwertig</option>
+                </select>
+              </label>
+              <label>
+                Plattform
+                <select id="aiPlatform">
+                  <option>Instagram Reel</option>
+                  <option>TikTok</option>
+                  <option>Carousel</option>
+                  <option>Story</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Ziel
+              <select id="aiGoal">
+                <option>Abo verkaufen</option>
+                <option>Community aufbauen</option>
+                <option>Behind the scenes zeigen</option>
+                <option>Newsletter / Warteliste pushen</option>
+              </select>
+            </label>
+            <label>
+              Zusatzinfo / aktueller Gedanke
+              <textarea id="aiNote" rows="4" placeholder="z. B. Ich möchte zeigen, dass echte Post wieder besonders ist..."></textarea>
+            </label>
+            <button class="primary-btn wide" type="submit">Content Ideen generieren</button>
+          </form>
+
+          <div class="trend-box">
+            <p class="eyebrow">2026 Trendlogik</p>
+            <ul>
+              <li>Authentische Gründerstory statt perfekter Werbung</li>
+              <li>Curiosity Hook in den ersten 2 Sekunden</li>
+              <li>Emotionaler Nutzen: Warum dieser Brief deinen Alltag verschönert</li>
+              <li>Originale Videos, keine reinen Reposts</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel output-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Output</p>
+              <h3>Ideen, Skripte, Captions & Voice-over</h3>
+            </div>
+            <button class="small-btn" id="clearIdeas">Leeren</button>
+          </div>
+          <div id="ideaOutput" class="idea-output empty-state">
+            <p class="script-title">Erzähl mir dein Monats-Thema.</p>
+            <p>Dann bekommst du passende Reel-/TikTok-Ideen inklusive Hook, Szenen, Skript, Voice-over, Caption, Hashtags und To-do-Liste.</p>
+          </div>
+        </article>
+      </div>
+
+      <article class="panel reference-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Referenzen analysieren</p>
+            <h3>Snail-Mail / Mail-Club Video-Beispiele seit 2025</h3>
+          </div>
+        </div>
+        <div id="referenceVideos" class="reference-grid"></div>
+      </article>
+    </section>
+
+    <section class="view" id="todosView">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Task Management</p>
+            <h3>To-do Liste</h3>
+          </div>
+        </div>
+        <form id="todoForm" class="inline-form">
+          <input id="todoTitle" placeholder="Neue Aufgabe, z. B. Reel für Juli-Brief filmen" required />
+          <input id="todoDate" type="date" />
+          <select id="todoPriority">
+            <option value="normal">Normal</option>
+            <option value="high">Wichtig</option>
+            <option value="low">Später</option>
+          </select>
+          <button class="primary-btn" type="submit">Hinzufügen</button>
+        </form>
+        <div class="todo-tabs">
+          <button class="filter-btn active" data-filter="all">Alle</button>
+          <button class="filter-btn" data-filter="open">Offen</button>
+          <button class="filter-btn" data-filter="done">Erledigt</button>
+        </div>
+        <div id="todoList" class="todo-list"></div>
+      </article>
+    </section>
+
+    <section class="view" id="calendarView">
+      <article class="panel">
+        <div class="panel-head calendar-head enhanced-calendar-head">
+          <button class="small-btn" id="prevMonth" type="button">←</button>
+          <div>
+            <p class="eyebrow">Content Kalender</p>
+            <h3 id="calendarTitle">Monat</h3>
+          </div>
+          <button class="small-btn" id="nextMonth" type="button">→</button>
+        </div>
+
+        <div class="calendar-toolbar" aria-label="Kalender Monat auswählen">
+          <select id="calendarMonthSelect" aria-label="Monat auswählen"></select>
+          <select id="calendarYearSelect" aria-label="Jahr auswählen"></select>
+          <button class="small-btn" id="todayBtn" type="button">Heute</button>
+        </div>
+
+        <form id="eventForm" class="calendar-event-form">
+          <input id="eventTitle" placeholder="Kalendereintrag, z. B. Versand vorbereiten" required />
+          <div class="date-dropdowns" aria-label="Datum auswählen">
+            <select id="eventDay" aria-label="Tag"></select>
+            <select id="eventMonth" aria-label="Monat"></select>
+            <select id="eventYear" aria-label="Jahr"></select>
+          </div>
+          <select id="eventType" aria-label="Kategorie">
+            <option value="content">Content</option>
+            <option value="business">Business</option>
+            <option value="shipping">Versand</option>
+            <option value="recipe">Rezept</option>
+          </select>
+          <textarea id="eventNotes" rows="2" placeholder="Notiz, z. B. Reel Hook, Material, Erinnerung..."></textarea>
+          <button class="primary-btn" type="submit">Eintragen</button>
+        </form>
+
+        <div class="calendar-grid-labels">
+          <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </article>
+
+      <article class="panel day-agenda-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Tagesplanung</p>
+            <h3 id="selectedDayTitle">Heute</h3>
+          </div>
+          <button class="small-btn" id="quickAddSelectedDay" type="button">Eintrag für diesen Tag</button>
+        </div>
+        <div id="dayAgenda" class="day-agenda"></div>
+      </article>
+    </section>
+
+    <section class="view" id="yearView">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Jahresplanung</p>
+            <h3>Monatsübersicht 2026</h3>
+          </div>
+          <button class="small-btn" id="addYearTask">Abo-Fristen anlegen</button>
+        </div>
+        <div id="yearGrid" class="year-grid"></div>
+      </article>
+    </section>
+
+    <section class="view" id="moodboardView">
+      <article class="panel moodboard-toolbar">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Editorial Journal</p>
+            <h3 id="moodTitle">Moodboard</h3>
+          </div>
+          <div class="toolbar-actions">
+            <select id="moodMonthSelect"></select>
+            <label class="upload-btn">
+              Titelbild
+              <input id="coverInput" type="file" accept="image/*" hidden />
+            </label>
+            <label class="upload-btn">
+              Foto hinzufügen
+              <input id="photoInput" type="file" accept="image/*" multiple hidden />
+            </label>
+            <button class="primary-btn" id="saveMoodboard">Speichern</button>
+          </div>
+        </div>
+      </article>
+
+      <section class="journal-wrap">
+        <div class="journal-book">
+          <div class="journal-page notes-page">
+            <span class="washi washi-1"></span>
+            <span class="magnet heart-1">♥</span>
+            <span class="magnet heart-2">♥</span>
+            <p class="script-title">monthly notes</p>
+            <input id="moodTheme" class="journal-input title-input" placeholder="Monatsthema" />
+            <input id="moodRecipe" class="journal-input" placeholder="Rezept des Monats" />
+            <textarea id="moodNotes" class="handwriting" placeholder="Gedanken, Bildideen, Farben, Texte, kleine Momente..."></textarea>
+          </div>
+          <div class="journal-page photo-page">
+            <span class="washi washi-2"></span>
+            <span class="washi washi-3"></span>
+            <div id="coverPreview" class="cover-preview">Titelbild</div>
+            <div id="photoCanvas" class="photo-canvas"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="settingsView">
+      <div class="grid two-col">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Privater Zugang</p>
+              <h3>Account & Session</h3>
+            </div>
+          </div>
+          <div class="auth-box">
+            <p class="eyebrow">Login-Status</p>
+            <p id="authStatus" class="muted tiny">Nicht verbunden.</p>
+            <div class="button-row">
+              <button class="small-btn danger" id="signOutBtn">Logout</button>
+            </div>
+          </div>
+        </article>
+
+        
+
+
+  <div id="eventModal" class="event-modal hidden" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+    <div class="event-modal-card">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Kalendereintrag bearbeiten</p>
+          <h3 id="eventModalTitle">Eintrag anpassen</h3>
+        </div>
+        <button class="small-btn" id="closeEventModal" type="button">Schließen</button>
+      </div>
+
+      <form id="eventEditForm" class="form-stack">
+        <label>
+          Titel
+          <input id="editEventTitle" required placeholder="Titel des Kalendereintrags" />
+        </label>
+
+        <label>
+          Datum
+          <div class="date-dropdowns" aria-label="Datum auswählen">
+            <select id="editEventDay" aria-label="Tag"></select>
+            <select id="editEventMonth" aria-label="Monat"></select>
+            <select id="editEventYear" aria-label="Jahr"></select>
+          </div>
+        </label>
+
+        <label>
+          Kategorie
+          <select id="editEventType">
+            <option value="content">Content</option>
+            <option value="business">Business</option>
+            <option value="shipping">Versand</option>
+            <option value="recipe">Rezept</option>
+          </select>
+        </label>
+
+        <label>
+          Notiz
+          <textarea id="editEventNotes" rows="4" placeholder="Notiz zum Eintrag"></textarea>
+        </label>
+
+        <div class="button-row modal-actions">
+          <button class="small-btn danger" id="deleteEventFromModal" type="button">Löschen</button>
+          <button class="primary-btn" type="submit">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <template id="ideaTemplate">
+    <article class="idea-card">
+      <div class="idea-card-head">
+        <span class="tag"></span>
+        <button class="small-btn save-idea">In Kalender/To-do übernehmen</button>
+      </div>
+      <h4></h4>
+      <p class="hook"></p>
+      <div class="idea-columns">
+        <div><strong>Szenen</strong><ul class="scenes"></ul></div>
+        <div><strong>Voice-over</strong><p class="voiceover"></p></div>
+      </div>
+      <details>
+        <summary>Caption & Hashtags</summary>
+        <p class="caption"></p>
+        <p class="hashtags"></p>
+      </details>
+    </article>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
