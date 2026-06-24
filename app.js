@@ -331,6 +331,12 @@ async function loadRemoteState() {
     supabaseClient.from('ml_moodboard_assets').select('*').order('z', { ascending: true })
   ]);
 
+  const remoteErrors = [todosRes, eventsRes, ideasRes, moodRes, assetsRes].filter(result => result.error).map(result => result.error.message);
+  if (remoteErrors.length) {
+    console.error('Supabase Ladefehler:', remoteErrors);
+    setAuthMessage(`Supabase Ladefehler: ${remoteErrors[0]}`, 'error');
+  }
+
   if (!todosRes.error && todosRes.data) state.todos = todosRes.data;
   if (!eventsRes.error && eventsRes.data) state.events = eventsRes.data;
   if (!ideasRes.error && ideasRes.data) state.ideas = ideasRes.data.map(dbIdeaToAppIdea);
@@ -410,8 +416,21 @@ async function signedUrl(path) {
 async function upsertRemote(table, item) {
   saveLocalState();
   if (!supabaseClient || !currentUser) return;
-  const { error } = await supabaseClient.from(table).upsert(item);
-  if (error) console.error(error);
+
+  // Wichtig für echte Synchronisierung über mehrere Geräte:
+  // Jede Zeile bekommt explizit die Supabase User-ID.
+  // Dadurch greifen die RLS-Regeln sauber und die Daten landen wirklich in Supabase.
+  const payload = { ...item, user_id: currentUser.id };
+  const { error } = await supabaseClient.from(table).upsert(payload, { onConflict: 'id' });
+
+  if (error) {
+    console.error('Supabase Sync Fehler:', table, error);
+    updateSyncStatus('Sync Fehler');
+    setAuthMessage(`Supabase Sync Fehler bei ${table}: ${error.message}`, 'error');
+    return;
+  }
+
+  updateSyncStatus('Supabase Sync');
 }
 
 async function deleteRemote(table, id) {
@@ -612,45 +631,6 @@ function renderMoodMonthSelect() {
   select.value = activeMonthKey;
 }
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function getAssetAspectRatio(asset) {
-  if (asset.aspect_ratio) return asset.aspect_ratio;
-  if (asset.width && asset.height) return asset.width / asset.height;
-  return 1;
-}
-
-function getAssetDisplaySize(asset) {
-  const aspectRatio = getAssetAspectRatio(asset);
-  const width = clamp(asset.width || 180, 90, 420);
-  const height = Math.max(90, Math.round(width / aspectRatio));
-  return { width, height };
-}
-
-function applyAssetSize(asset, rawWidth) {
-  const aspectRatio = getAssetAspectRatio(asset);
-  const width = clamp(Math.round(rawWidth), 90, 420);
-  asset.width = width;
-  asset.height = Math.max(90, Math.round(width / aspectRatio));
-  return getAssetDisplaySize(asset);
-}
-
-function ensureAssetAspectRatio(asset) {
-  if (!asset?.url || asset.aspect_ratio) return;
-  const img = new Image();
-  img.onload = () => {
-    const ratio = img.naturalWidth / img.naturalHeight;
-    if (ratio > 0) {
-      asset.aspect_ratio = ratio;
-      if (!asset.height) asset.height = Math.max(90, Math.round((asset.width || 180) / ratio));
-      renderAssets();
-    }
-  };
-  img.src = asset.url;
-}
-
 function renderMoodboard() {
   const board = state.moodboards[activeMonthKey] || { title: activeMonthKey, theme: '', recipe: '', notes: '', cover_url: '' };
   $('#moodMonthSelect').value = activeMonthKey;
@@ -658,38 +638,25 @@ function renderMoodboard() {
   $('#moodTheme').value = board.theme || '';
   $('#moodRecipe').value = board.recipe || '';
   $('#moodNotes').value = board.notes || '';
-  const coverPreview = $('#coverPreview');
-  coverPreview.classList.toggle('has-cover', Boolean(board.cover_url));
-  coverPreview.innerHTML = board.cover_url
-    ? `<img src="${board.cover_url}" alt="Titelbild"><button class="cover-remove" type="button" data-action="remove-cover" title="Titelbild entfernen" aria-label="Titelbild entfernen">×</button>`
-    : '<span>Titelbild</span>';
+  $('#coverPreview').innerHTML = board.cover_url ? `<img src="${board.cover_url}" alt="Titelbild">` : 'Titelbild';
   renderAssets();
 }
 
 function renderAssets() {
   const canvas = $('#photoCanvas');
   const assets = state.assets.filter(asset => asset.month_key === activeMonthKey).sort((a,b) => (a.z || 0) - (b.z || 0));
-  canvas.innerHTML = assets.map(asset => {
-    const { width, height } = getAssetDisplaySize(asset);
-    return `
-      <div class="photo-note ${selectedAssetId === asset.id ? 'selected' : ''}" data-id="${asset.id}" style="left:${asset.x}px;top:${asset.y}px;width:${width}px;height:${height}px;transform:rotate(${asset.rotation}deg);z-index:${asset.z || 1}">
-        <img src="${asset.url}" alt="Moodboard Foto" draggable="false">
-        <div class="photo-controls" aria-label="Foto bearbeiten">
-          <label class="size-control" title="Fotogröße anpassen">
-            <input type="range" min="90" max="420" step="2" value="${width}" data-action="resize" aria-label="Fotogröße">
-          </label>
-          <button type="button" data-action="smaller" title="Kleiner">−</button>
-          <button type="button" data-action="bigger" title="Größer">+</button>
-          <button type="button" data-action="rotate-left" title="Links drehen">↺</button>
-          <button type="button" data-action="rotate-right" title="Rechts drehen">↻</button>
-          <button type="button" data-action="delete" title="Löschen">×</button>
-        </div>
-        <span class="photo-resize-handle" title="Größe anpassen"></span>
+  canvas.innerHTML = assets.map(asset => `
+    <div class="photo-note ${selectedAssetId === asset.id ? 'selected' : ''}" data-id="${asset.id}" style="left:${asset.x}px;top:${asset.y}px;width:${asset.width}px;transform:rotate(${asset.rotation}deg);z-index:${asset.z || 1}">
+      <img src="${asset.url}" alt="Moodboard Foto" draggable="false">
+      <div class="photo-controls">
+        <button data-action="smaller">−</button>
+        <button data-action="bigger">+</button>
+        <button data-action="rotate-left">↺</button>
+        <button data-action="rotate-right">↻</button>
+        <button data-action="delete">×</button>
       </div>
-    `;
-  }).join('');
-
-  assets.forEach(asset => ensureAssetAspectRatio(asset));
+    </div>
+  `).join('');
 }
 
 function renderIdeas() {
@@ -1197,17 +1164,6 @@ function bindEvents() {
     renderAll();
   });
 
-  $('#coverPreview').addEventListener('click', async (event) => {
-    const removeButton = event.target.closest('[data-action="remove-cover"]');
-    if (!removeButton) return;
-    const board = state.moodboards[activeMonthKey];
-    if (!board) return;
-    board.cover_path = '';
-    board.cover_url = '';
-    await saveMoodboardRemote();
-    renderMoodboard();
-  });
-
   $('#photoInput').addEventListener('change', async (event) => {
     const files = [...event.target.files || []];
     let z = Math.max(0, ...state.assets.map(a => a.z || 0));
@@ -1221,7 +1177,6 @@ function bindEvents() {
         x: 90 + Math.random() * 220,
         y: 180 + Math.random() * 220,
         width: 180,
-        height: 180,
         rotation: Math.round(Math.random() * 12 - 6),
         z: ++z
       };
@@ -1282,7 +1237,6 @@ function saveMoodboardFromInputs(persist = true) {
 function bindPhotoCanvas() {
   const canvas = $('#photoCanvas');
   let dragging = null;
-  let resizing = null;
 
   canvas.addEventListener('pointerdown', (event) => {
     const note = event.target.closest('.photo-note');
@@ -1292,21 +1246,6 @@ function bindPhotoCanvas() {
     selectedAssetId = asset.id;
     const maxZ = Math.max(0, ...state.assets.map(a => a.z || 0));
     asset.z = maxZ + 1;
-
-    if (event.target.closest('.photo-resize-handle')) {
-      resizing = {
-        asset,
-        note,
-        startX: event.clientX,
-        startY: event.clientY,
-        startWidth: getAssetDisplaySize(asset).width,
-        startHeight: getAssetDisplaySize(asset).height
-      };
-      note.setPointerCapture(event.pointerId);
-      event.preventDefault();
-      return;
-    }
-
     if (event.target.closest('.photo-controls')) return;
     dragging = { asset, startX: event.clientX, startY: event.clientY, originalX: asset.x, originalY: asset.y };
     note.setPointerCapture(event.pointerId);
@@ -1314,16 +1253,6 @@ function bindPhotoCanvas() {
   });
 
   canvas.addEventListener('pointermove', (event) => {
-    if (resizing) {
-      const deltaX = event.clientX - resizing.startX;
-      const deltaY = event.clientY - resizing.startY;
-      const nextWidth = clamp(resizing.startWidth + deltaX, 90, 420);
-      const { width, height } = applyAssetSize(resizing.asset, nextWidth);
-      resizing.note.style.width = `${width}px`;
-      resizing.note.style.height = `${height}px`;
-      return;
-    }
-
     if (!dragging) return;
     dragging.asset.x = Math.max(0, dragging.originalX + (event.clientX - dragging.startX));
     dragging.asset.y = Math.max(0, dragging.originalY + (event.clientY - dragging.startY));
@@ -1337,29 +1266,7 @@ function bindPhotoCanvas() {
 
   canvas.addEventListener('pointerup', async () => {
     if (dragging) await saveAssetRemote(dragging.asset);
-    if (resizing) await saveAssetRemote(resizing.asset);
     dragging = null;
-    resizing = null;
-  });
-
-  canvas.addEventListener('input', (event) => {
-    const slider = event.target.closest('.photo-controls input[type="range"]');
-    if (!slider) return;
-    const note = event.target.closest('.photo-note');
-    const asset = state.assets.find(a => a.id === note.dataset.id);
-    if (!asset) return;
-    const { width, height } = applyAssetSize(asset, Number(slider.value));
-    note.style.width = `${width}px`;
-    note.style.height = `${height}px`;
-  });
-
-  canvas.addEventListener('change', async (event) => {
-    const slider = event.target.closest('.photo-controls input[type="range"]');
-    if (!slider) return;
-    const note = event.target.closest('.photo-note');
-    const asset = state.assets.find(a => a.id === note.dataset.id);
-    if (!asset) return;
-    await saveAssetRemote(asset);
   });
 
   canvas.addEventListener('click', async (event) => {
@@ -1369,8 +1276,8 @@ function bindPhotoCanvas() {
     const asset = state.assets.find(a => a.id === note.dataset.id);
     if (!asset) return;
     const action = control.dataset.action;
-    if (action === 'smaller') applyAssetSize(asset, asset.width - 20);
-    if (action === 'bigger') applyAssetSize(asset, asset.width + 20);
+    if (action === 'smaller') asset.width = Math.max(90, asset.width - 20);
+    if (action === 'bigger') asset.width = Math.min(420, asset.width + 20);
     if (action === 'rotate-left') asset.rotation -= 8;
     if (action === 'rotate-right') asset.rotation += 8;
     if (action === 'delete') {
